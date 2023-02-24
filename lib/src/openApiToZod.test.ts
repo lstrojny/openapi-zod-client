@@ -1,6 +1,6 @@
 import type { SchemaObject } from "openapi3-ts";
 import { expect, test } from "vitest";
-import { getZodSchema } from "./openApiToZod";
+import { getZodChain, getZodSchema } from "./openApiToZod";
 import type { CodeMetaData, ConversionTypeContext } from "./CodeMeta";
 import { makeSchemaResolver } from "./makeSchemaResolver";
 import { asComponentSchema } from "./utils";
@@ -109,15 +109,15 @@ test("getSchemaAsZodString", () => {
 });
 
 test("getSchemaWithChainableAsZodString", () => {
-    expect(getSchemaAsZodString({ type: "string", nullable: true })).toMatchInlineSnapshot('"z.string()"');
-    expect(getSchemaAsZodString({ type: "string", nullable: false })).toMatchInlineSnapshot('"z.string()"');
+    expect(getZodChain({ schema: { type: "string", nullable: true } })).toMatchInlineSnapshot('".nullish()"');
+    expect(getZodChain({ schema: { type: "string", nullable: false } })).toMatchInlineSnapshot('".optional()"');
 
-    expect(getSchemaAsZodString({ type: "string", nullable: false }, { isRequired: true })).toMatchInlineSnapshot(
-        '"z.string()"'
-    );
-    expect(getSchemaAsZodString({ type: "string", nullable: true }, { isRequired: true })).toMatchInlineSnapshot(
-        '"z.string()"'
-    );
+    expect(
+        getZodChain({ schema: { type: "string", nullable: false }, meta: { isRequired: true } })
+    ).toMatchInlineSnapshot('""');
+    expect(
+        getZodChain({ schema: { type: "string", nullable: true }, meta: { isRequired: true } })
+    ).toMatchInlineSnapshot('".nullable()"');
 });
 
 test("CodeMeta with missing ref", () => {
